@@ -3,7 +3,8 @@ from rest_framework.routers import DefaultRouter
 from .views import AssignmentViewSet
 
 router = DefaultRouter()
-router.register(r'assignments', AssignmentViewSet, basename='assignments')
+# Register at root so the router does not add an extra 'assignments' in URL
+router.register(r'', AssignmentViewSet, basename='assignments')
 
 urlpatterns = [
     path('', include(router.urls)),

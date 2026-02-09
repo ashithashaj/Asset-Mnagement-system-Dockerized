@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -12,18 +12,35 @@ from tickets.serializers import TicketSerializer
 
 # ---------------- Asset CRUD ---------------- #
 class AssetViewSet(viewsets.ModelViewSet):
+    """
+    Handles all CRUD operations for Assets:
+    - list, retrieve, create, update, delete
+    """
     queryset = Asset.objects.all().order_by('name')
     serializer_class = AssetSerializer
     permission_classes = [IsAuthenticated]
-    # You can add search, filter, ordering in future if needed
+
+    # Optional: add search and ordering
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['name', 'type', 'serial_number', 'status']
+    ordering_fields = ['name', 'purchase_date', 'status']
+
 
 # ---------------- Dashboard API ---------------- #
 class DashboardAPIView(APIView):
+    """
+    Provides dashboard statistics for the frontend:
+    - total assets
+    - asset count by status
+    - latest 5 assignments
+    - latest 5 tickets
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        # Asset stats
+        # Total assets
         total_assets = Asset.objects.count()
+        # Asset count grouped by status
         asset_status = Asset.objects.values('status').annotate(count=Count('id'))
 
         # Latest 5 assignments
