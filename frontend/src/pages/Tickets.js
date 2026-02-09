@@ -6,7 +6,6 @@ import Table from "../components/Table";
 import Form from "../components/Form";
 import axios from "axios";
 
-// Backend URLs
 const ASSETS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/assets/";
 const USERS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/users/";
 
@@ -19,7 +18,6 @@ export default function Tickets() {
   const [assetsList, setAssetsList] = useState([]);
   const [techniciansList, setTechniciansList] = useState([]);
 
-  // Fetch tickets, assets, technicians
   useEffect(() => {
     dispatch(fetchTickets());
     fetchAssets();
@@ -42,7 +40,7 @@ export default function Tickets() {
       const res = await axios.get(USERS_API, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
-      setTechniciansList(res.data);
+      setTechniciansList(res.data); // <-- this is your dropdown list
     } catch (err) {
       console.error("Failed to fetch technicians:", err);
     }
@@ -73,11 +71,13 @@ export default function Tickets() {
     setShowModal(false);
   };
 
-  // Map tickets for table
   const tableData = Array.isArray(tickets)
     ? tickets.map((t) => ({
         ...t,
-        technician_name: t.technician_name || "-", // from serializer
+        technician_name:
+          typeof t.assigned_technician === "object"
+            ? t.assigned_technician?.username
+            : (techniciansList.find((tech) => tech.id === t.assigned_technician)?.username || "-"),
         actions: (
           <div style={{ display: "flex", gap: "10px" }}>
             <button onClick={() => handleEdit(t)}>Edit</button>
@@ -93,10 +93,10 @@ export default function Tickets() {
       <button onClick={handleAdd}>Create Ticket</button>
 
       {loading && <p>Loading tickets...</p>}
-      {error && <p style={{ color: "red" }}>{JSON.stringify(error)}</p>}
-      {!loading && !error && tableData.length === 0 && <p>No tickets found.</p>}
+      {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
+      {!loading && tableData.length === 0 && <p>No tickets found.</p>}
 
-      {!loading && tableData.length > 0 && (
+      {tableData.length > 0 && (
         <Table
           columns={[
             { key: "asset_name", label: "Asset" },
@@ -122,7 +122,6 @@ export default function Tickets() {
               label: "Asset",
               type: "select",
               options: assetsList.map((a) => ({ value: a.id, label: a.name })),
-              defaultValue: currentTicket ? currentTicket.asset : null,
             },
             { name: "issue", label: "Issue", type: "text" },
             {
@@ -135,20 +134,12 @@ export default function Tickets() {
                 { value: "Completed", label: "Completed" },
                 { value: "Cancelled", label: "Cancelled" },
               ],
-              defaultValue: currentTicket ? currentTicket.status : "Pending",
             },
             {
               name: "assigned_technician",
               label: "Technician",
               type: "select",
-              options: techniciansList.map((t) => ({
-                value: t.id,
-                label:
-                  t.first_name && t.last_name
-                    ? `${t.first_name} ${t.last_name}`
-                    : t.username,
-              })),
-              defaultValue: currentTicket ? currentTicket.assigned_technician : null, // preselect
+              options: techniciansList.map((t) => ({ value: t.id, label: t.username })),
             },
           ]}
         />
