@@ -5,8 +5,9 @@ import Table from "../components/Table";
 import Form from "../components/Form";
 import axios from "axios";
 
+// ✅ Updated USERS_API URL to point to the correct endpoint
 const ASSETS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/assets/";
-const USERS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/users/";
+const USERS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/users/users/";
 
 export default function Tickets() {
   const dispatch = useDispatch();
@@ -75,7 +76,7 @@ export default function Tickets() {
     setShowModal(false);
   };
 
-  // Map tickets to table rows (leave table as it is)
+  // Map tickets to table rows
   const tableData =
     Array.isArray(tickets) && !techLoading
       ? tickets.map((t) => ({
@@ -153,7 +154,6 @@ export default function Tickets() {
               ],
               value: currentTicket?.status || "",
             },
-            // ✅ FIXED Dropdown for assigned_technician
             {
               name: "assigned_technician",
               label: "Technician",
@@ -165,7 +165,7 @@ export default function Tickets() {
                   label: `${t.first_name || ""} ${t.last_name || ""}`.trim() || t.username,
                 })),
               ],
-              value: currentTicket?.assigned_technician || "", // pre-select by ID
+              value: currentTicket?.assigned_technician || "",
             },
           ]}
         />
