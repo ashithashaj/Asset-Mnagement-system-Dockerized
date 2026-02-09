@@ -1,4 +1,3 @@
-// src/pages/Tickets.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTickets, addTicket, updateTicket, deleteTicket } from "../features/ticketsSlice";
@@ -17,8 +16,9 @@ export default function Tickets() {
   const [currentTicket, setCurrentTicket] = useState(null);
   const [assetsList, setAssetsList] = useState([]);
   const [techniciansList, setTechniciansList] = useState([]);
+  const [techLoading, setTechLoading] = useState(true);
 
-  // Fetch tickets, assets, technicians
+  // Fetch tickets, assets, and technicians
   useEffect(() => {
     dispatch(fetchTickets());
     fetchAssets();
@@ -41,9 +41,12 @@ export default function Tickets() {
       const res = await axios.get(USERS_API, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
-      setTechniciansList(res.data);
+      const users = Array.isArray(res.data) ? res.data : res.data.results;
+      setTechniciansList(users || []);
+      setTechLoading(false);
     } catch (err) {
       console.error("Failed to fetch technicians:", err);
+      setTechLoading(false);
     }
   };
 
@@ -72,28 +75,21 @@ export default function Tickets() {
     setShowModal(false);
   };
 
-  // Map tickets for table
-  const tableData = Array.isArray(tickets) ? tickets.map((t) => {
-    let technicianName = "-";
-    if (t.assigned_technician) {
-      if (typeof t.assigned_technician === "object") {
-        technicianName = t.assigned_technician.username || "-";
-      } else {
-        const tech = techniciansList.find((tech) => tech.id === t.assigned_technician);
-        technicianName = tech ? tech.username : "-";
-      }
-    }
-    return {
-      ...t,
-      technician_name: technicianName,
-      actions: (
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button onClick={() => handleEdit(t)}>Edit</button>
-          <button onClick={() => handleDelete(t.id)}>Delete</button>
-        </div>
-      ),
-    };
-  }) : [];
+  // Map tickets to table rows (leave table as it is)
+  const tableData =
+    Array.isArray(tickets) && !techLoading
+      ? tickets.map((t) => ({
+          ...t,
+          technician_name: t.technician_name || "-",
+          asset_name: t.asset_name || "-",
+          actions: (
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={() => handleEdit(t)}>Edit</button>
+              <button onClick={() => handleDelete(t.id)}>Delete</button>
+            </div>
+          ),
+        }))
+      : [];
 
   return (
     <div style={{ padding: "20px" }}>
@@ -101,10 +97,11 @@ export default function Tickets() {
       <button onClick={handleAdd}>Create Ticket</button>
 
       {loading && <p>Loading tickets...</p>}
+      {techLoading && <p>Loading users...</p>}
       {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
-      {!loading && !error && tableData.length === 0 && <p>No tickets found.</p>}
+      {!loading && !techLoading && tableData.length === 0 && <p>No tickets found.</p>}
 
-      {!loading && tableData.length > 0 && (
+      {!loading && !techLoading && tableData.length > 0 && (
         <Table
           columns={[
             { key: "asset_name", label: "Asset" },
@@ -118,8 +115,10 @@ export default function Tickets() {
         />
       )}
 
-      {showModal && (
+      {/* Form Modal - only render after technicians are loaded */}
+      {showModal && !techLoading && (
         <Form
+          key={techniciansList.length} // force re-render when users load
           title={currentTicket ? "Edit Ticket" : "Create Ticket"}
           data={currentTicket}
           onSubmit={handleSubmit}
@@ -129,28 +128,44 @@ export default function Tickets() {
               name: "asset",
               label: "Asset",
               type: "select",
-              options: assetsList.map((a) => ({ value: a.id, label: a.name })),
+              options: [
+                { value: "", label: "Select Asset" },
+                ...assetsList.map((a) => ({ value: a.id, label: a.name })),
+              ],
               value: currentTicket?.asset || "",
             },
-            { name: "issue", label: "Issue", type: "text", value: currentTicket?.issue || "" },
+            {
+              name: "issue",
+              label: "Issue",
+              type: "text",
+              value: currentTicket?.issue || "",
+            },
             {
               name: "status",
               label: "Status",
               type: "select",
               options: [
+                { value: "", label: "Select Status" },
                 { value: "Pending", label: "Pending" },
                 { value: "In Progress", label: "In Progress" },
                 { value: "Completed", label: "Completed" },
                 { value: "Cancelled", label: "Cancelled" },
               ],
-              value: currentTicket?.status || "Pending",
+              value: currentTicket?.status || "",
             },
+            // ✅ FIXED Dropdown for assigned_technician
             {
               name: "assigned_technician",
               label: "Technician",
               type: "select",
-              options: techniciansList.map((t) => ({ value: t.id, label: t.username })),
-              value: currentTicket?.assigned_technician?.id || currentTicket?.assigned_technician || "",
+              options: [
+                { value: "", label: "Select Technician" },
+                ...techniciansList.map((t) => ({
+                  value: t.id,
+                  label: `${t.first_name || ""} ${t.last_name || ""}`.trim() || t.username,
+                })),
+              ],
+              value: currentTicket?.assigned_technician || "", // pre-select by ID
             },
           ]}
         />
