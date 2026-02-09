@@ -2,7 +2,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/tickets/";
+// Remove trailing slash to avoid double-slash issues
+const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/tickets";
 
 // ------------------ THUNKS ------------------
 
@@ -41,7 +42,7 @@ export const updateTicket = createAsyncThunk(
   "tickets/updateTicket",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const res = await axios.put(`${API_URL}${id}/`, data, {
+      const res = await axios.put(`${API_URL}/${id}`, data, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
       return res.data;
@@ -56,7 +57,7 @@ export const deleteTicket = createAsyncThunk(
   "tickets/deleteTicket",
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}${id}/`, {
+      await axios.delete(`${API_URL}/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
       return id;

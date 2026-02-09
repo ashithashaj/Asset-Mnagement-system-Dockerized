@@ -188,7 +188,11 @@ export default function Tickets() {
                     ? `${t.first_name} ${t.last_name}`
                     : t.username,
               })),
-              defaultValue: currentTicket ? currentTicket.assigned_technician : null, // ✅ Pre-select technician
+              defaultValue: currentTicket
+                ? typeof currentTicket.assigned_technician === "object"
+                  ? currentTicket.assigned_technician.id
+                  : currentTicket.assigned_technician
+                : null,
             },
           ]}
         />
