@@ -7,11 +7,12 @@ import Form from "../components/Form";
 
 export default function Inventory() {
   const dispatch = useDispatch();
-  const { items, loading } = useSelector((state) => state.inventory);
+  const { items, loading, error } = useSelector((state) => state.inventory);
 
   const [showModal, setShowModal] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
 
+  // Fetch inventory on load
   useEffect(() => {
     dispatch(fetchInventory());
   }, [dispatch]);
@@ -53,9 +54,15 @@ export default function Inventory() {
       <h2>Inventory</h2>
       <button onClick={handleAdd}>Add Item</button>
 
-      {loading ? (
-        <p>Loading inventory...</p>
-      ) : (
+      {loading && <p>Loading inventory...</p>}
+
+      {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
+
+      {!loading && !error && Array.isArray(items) && items.length === 0 && (
+        <p>No inventory items found.</p>
+      )}
+
+      {!loading && Array.isArray(items) && items.length > 0 && (
         <Table
           columns={columns}
           data={items.map((i) => ({

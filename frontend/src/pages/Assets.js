@@ -1,3 +1,4 @@
+// src/pages/Assets.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAssets, addAsset, updateAsset, deleteAsset } from "../features/assetsSlice";
@@ -6,7 +7,7 @@ import Form from "../components/Form";
 
 export default function Assets() {
   const dispatch = useDispatch();
-  const { assets, loading } = useSelector((state) => state.assets);
+  const { assets, loading, error } = useSelector((state) => state.assets);
 
   const [showModal, setShowModal] = useState(false);
   const [currentAsset, setCurrentAsset] = useState(null);
@@ -56,9 +57,15 @@ export default function Assets() {
       <h2>Assets</h2>
       <button onClick={handleAdd}>Add Asset</button>
 
-      {loading ? (
-        <p>Loading assets...</p>
-      ) : (
+      {loading && <p>Loading assets...</p>}
+
+      {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
+
+      {!loading && !error && Array.isArray(assets) && assets.length === 0 && (
+        <p>No assets found.</p>
+      )}
+
+      {!loading && Array.isArray(assets) && assets.length > 0 && (
         <Table
           columns={columns}
           data={assets.map((a) => ({
@@ -83,7 +90,7 @@ export default function Assets() {
             { name: "name", label: "Name", type: "text" },
             { name: "type", label: "Type", type: "text" },
             { name: "serial_number", label: "Serial Number", type: "text" },
-            { name: "status", label: "Status", type: "text" }, // can be dropdown later
+            { name: "status", label: "Status", type: "text" },
             { name: "purchase_date", label: "Purchase Date", type: "date" },
           ]}
         />

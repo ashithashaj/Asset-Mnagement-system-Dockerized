@@ -1,3 +1,4 @@
+// src/pages/Tickets.js
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTickets, addTicket, updateTicket, deleteTicket } from "../features/ticketsSlice";
@@ -5,9 +6,13 @@ import Table from "../components/Table";
 import Form from "../components/Form";
 import axios from "axios";
 
+// Use your Render backend URLs
+const ASSETS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/assets/";
+const USERS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/users/";
+
 export default function Tickets() {
   const dispatch = useDispatch();
-  const { tickets, loading } = useSelector((state) => state.tickets);
+  const { tickets, loading, error } = useSelector((state) => state.tickets);
 
   const [showModal, setShowModal] = useState(false);
   const [currentTicket, setCurrentTicket] = useState(null);
@@ -23,7 +28,7 @@ export default function Tickets() {
 
   const fetchAssets = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/assets/", {
+      const res = await axios.get(ASSETS_API, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
       setAssetsList(res.data);
@@ -34,7 +39,7 @@ export default function Tickets() {
 
   const fetchTechnicians = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/users/", {
+      const res = await axios.get(USERS_API, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
       setTechniciansList(res.data);
@@ -68,8 +73,8 @@ export default function Tickets() {
     setShowModal(false);
   };
 
-  // Safe mapping of tickets for table — NO setState here
-  const tableData = tickets.map((t) => {
+  // Map tickets safely
+  const tableData = Array.isArray(tickets) ? tickets.map((t) => {
     let technicianName = "-";
     if (t.assigned_technician) {
       if (typeof t.assigned_technician === "object") {
@@ -116,7 +121,7 @@ export default function Tickets() {
         </div>
       ),
     };
-  });
+  }) : [];
 
   return (
     <div style={{ padding: "20px" }}>
@@ -137,14 +142,23 @@ export default function Tickets() {
         Create Ticket
       </button>
 
-      {loading ? <p>Loading tickets...</p> : <Table columns={[
-        { key: "asset_name", label: "Asset" },
-        { key: "issue", label: "Issue" },
-        { key: "status", label: "Status" },
-        { key: "technician_name", label: "Technician" },
-        { key: "created_at", label: "Created At" },
-        { key: "actions", label: "Actions" },
-      ]} data={tableData} />}
+      {loading && <p>Loading tickets...</p>}
+      {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
+      {!loading && !error && tableData.length === 0 && <p>No tickets found.</p>}
+
+      {!loading && tableData.length > 0 && (
+        <Table
+          columns={[
+            { key: "asset_name", label: "Asset" },
+            { key: "issue", label: "Issue" },
+            { key: "status", label: "Status" },
+            { key: "technician_name", label: "Technician" },
+            { key: "created_at", label: "Created At" },
+            { key: "actions", label: "Actions" },
+          ]}
+          data={tableData}
+        />
+      )}
 
       {showModal && (
         <Form
