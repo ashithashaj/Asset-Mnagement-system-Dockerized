@@ -6,7 +6,7 @@ import Table from "../components/Table";
 import Form from "../components/Form";
 import axios from "axios";
 
-// Use your Render backend URLs
+// Render backend URLs
 const ASSETS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/assets/";
 const USERS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/users/";
 
@@ -18,6 +18,7 @@ export default function Tickets() {
   const [currentTicket, setCurrentTicket] = useState(null);
   const [assetsList, setAssetsList] = useState([]);
   const [techniciansList, setTechniciansList] = useState([]);
+  const [selectedTechnician, setSelectedTechnician] = useState(null);
 
   // Fetch tickets, assets, and technicians
   useEffect(() => {
@@ -73,55 +74,63 @@ export default function Tickets() {
     setShowModal(false);
   };
 
-  // Map tickets safely
-  const tableData = Array.isArray(tickets) ? tickets.map((t) => {
-    let technicianName = "-";
-    if (t.assigned_technician) {
-      if (typeof t.assigned_technician === "object") {
-        technicianName = t.assigned_technician.username || "-";
-      } else {
-        const tech = techniciansList.find((tech) => tech.id === t.assigned_technician);
-        technicianName = tech ? tech.username : "-";
-      }
-    }
+  const handleSelectTechnician = (ticket) => {
+    setSelectedTechnician(ticket.technician_name || "-");
+  };
 
-    return {
-      ...t,
-      technician_name: technicianName,
-      actions: (
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            style={{
-              padding: "6px 12px",
-              backgroundColor: "#e0f7fa",
-              color: "#00796b",
-              border: "1px solid #b2ebf2",
-              borderRadius: "5px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => handleEdit(t)}
-          >
-            Edit
-          </button>
-          <button
-            style={{
-              padding: "6px 12px",
-              backgroundColor: "#fff3e0",
-              color: "#ef6c00",
-              border: "1px solid #ffe0b2",
-              borderRadius: "5px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-            onClick={() => handleDelete(t.id)}
-          >
-            Delete
-          </button>
-        </div>
-      ),
-    };
-  }) : [];
+  // Map tickets safely
+  const tableData = Array.isArray(tickets)
+    ? tickets.map((t) => ({
+        ...t,
+        technician_name: t.technician_name || "-", // use serializer field
+        actions: (
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#e0f7fa",
+                color: "#00796b",
+                border: "1px solid #b2ebf2",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => handleEdit(t)}
+            >
+              Edit
+            </button>
+            <button
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#fff3e0",
+                color: "#ef6c00",
+                border: "1px solid #ffe0b2",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => handleDelete(t.id)}
+            >
+              Delete
+            </button>
+            <button
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#f0f4c3",
+                color: "#827717",
+                border: "1px solid #e6ee9c",
+                borderRadius: "5px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => handleSelectTechnician(t)}
+            >
+              Select Technician
+            </button>
+          </div>
+        ),
+      }))
+    : [];
 
   return (
     <div style={{ padding: "20px" }}>
@@ -158,6 +167,20 @@ export default function Tickets() {
           ]}
           data={tableData}
         />
+      )}
+
+      {selectedTechnician && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            border: "1px solid #ccc",
+            backgroundColor: "#f1f8e9",
+          }}
+        >
+          <h3>Selected Technician</h3>
+          <p>{selectedTechnician}</p>
+        </div>
       )}
 
       {showModal && (
