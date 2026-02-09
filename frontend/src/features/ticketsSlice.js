@@ -2,8 +2,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Remove trailing slash to avoid double-slash issues
-const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/tickets";
+// Make sure this matches your deployed backend path exactly
+const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/tickets/";
 
 // ------------------ THUNKS ------------------
 
@@ -22,7 +22,7 @@ export const fetchTickets = createAsyncThunk(
   }
 );
 
-// Add new ticket
+// Add ticket
 export const addTicket = createAsyncThunk(
   "tickets/addTicket",
   async (ticket, { rejectWithValue }) => {
@@ -42,7 +42,8 @@ export const updateTicket = createAsyncThunk(
   "tickets/updateTicket",
   async ({ id, data }, { rejectWithValue }) => {
     try {
-      const res = await axios.put(`${API_URL}/${id}`, data, {
+      // ✅ Important: trailing slash must match backend
+      const res = await axios.put(`${API_URL}${id}/`, data, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
       return res.data;
@@ -57,7 +58,8 @@ export const deleteTicket = createAsyncThunk(
   "tickets/deleteTicket",
   async (id, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/${id}`, {
+      // ✅ Important: trailing slash must match backend
+      await axios.delete(`${API_URL}${id}/`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
       return id;
@@ -78,53 +80,21 @@ const ticketsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Fetch tickets
-      .addCase(fetchTickets.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchTickets.fulfilled, (state, action) => {
-        state.tickets = action.payload;
-        state.loading = false;
-      })
-      .addCase(fetchTickets.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // Add ticket
-      .addCase(addTicket.pending, (state) => {
-        state.error = null;
-      })
-      .addCase(addTicket.fulfilled, (state, action) => {
-        state.tickets.push(action.payload);
-      })
-      .addCase(addTicket.rejected, (state, action) => {
-        state.error = action.payload;
-      })
-
-      // Update ticket
-      .addCase(updateTicket.pending, (state) => {
-        state.error = null;
-      })
+      .addCase(fetchTickets.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchTickets.fulfilled, (state, action) => { state.tickets = action.payload; state.loading = false; })
+      .addCase(fetchTickets.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+      .addCase(addTicket.pending, (state) => { state.error = null; })
+      .addCase(addTicket.fulfilled, (state, action) => { state.tickets.push(action.payload); })
+      .addCase(addTicket.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(updateTicket.pending, (state) => { state.error = null; })
       .addCase(updateTicket.fulfilled, (state, action) => {
         const index = state.tickets.findIndex((t) => t.id === action.payload.id);
         if (index !== -1) state.tickets[index] = action.payload;
       })
-      .addCase(updateTicket.rejected, (state, action) => {
-        state.error = action.payload;
-      })
-
-      // Delete ticket
-      .addCase(deleteTicket.pending, (state) => {
-        state.error = null;
-      })
-      .addCase(deleteTicket.fulfilled, (state, action) => {
-        state.tickets = state.tickets.filter((t) => t.id !== action.payload);
-      })
-      .addCase(deleteTicket.rejected, (state, action) => {
-        state.error = action.payload;
-      });
+      .addCase(updateTicket.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(deleteTicket.pending, (state) => { state.error = null; })
+      .addCase(deleteTicket.fulfilled, (state, action) => { state.tickets = state.tickets.filter((t) => t.id !== action.payload); })
+      .addCase(deleteTicket.rejected, (state, action) => { state.error = action.payload; });
   },
 });
 

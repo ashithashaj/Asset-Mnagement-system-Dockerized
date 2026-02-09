@@ -19,7 +19,7 @@ export default function Tickets() {
   const [assetsList, setAssetsList] = useState([]);
   const [techniciansList, setTechniciansList] = useState([]);
 
-  // Fetch tickets, assets, and technicians
+  // Fetch tickets, assets, technicians
   useEffect(() => {
     dispatch(fetchTickets());
     fetchAssets();
@@ -80,34 +80,8 @@ export default function Tickets() {
         technician_name: t.technician_name || "-", // from serializer
         actions: (
           <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#e0f7fa",
-                color: "#00796b",
-                border: "1px solid #b2ebf2",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => handleEdit(t)}
-            >
-              Edit
-            </button>
-            <button
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#fff3e0",
-                color: "#ef6c00",
-                border: "1px solid #ffe0b2",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => handleDelete(t.id)}
-            >
-              Delete
-            </button>
+            <button onClick={() => handleEdit(t)}>Edit</button>
+            <button onClick={() => handleDelete(t.id)}>Delete</button>
           </div>
         ),
       }))
@@ -116,24 +90,10 @@ export default function Tickets() {
   return (
     <div style={{ padding: "20px" }}>
       <h2>Tickets</h2>
-      <button
-        onClick={handleAdd}
-        style={{
-          marginBottom: "10px",
-          padding: "8px 16px",
-          borderRadius: "5px",
-          border: "1px solid #80ae83",
-          backgroundColor: "#d1ded2",
-          color: "#388e3c",
-          cursor: "pointer",
-          fontWeight: "bold",
-        }}
-      >
-        Create Ticket
-      </button>
+      <button onClick={handleAdd}>Create Ticket</button>
 
       {loading && <p>Loading tickets...</p>}
-      {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
+      {error && <p style={{ color: "red" }}>{JSON.stringify(error)}</p>}
       {!loading && !error && tableData.length === 0 && <p>No tickets found.</p>}
 
       {!loading && tableData.length > 0 && (
@@ -188,11 +148,7 @@ export default function Tickets() {
                     ? `${t.first_name} ${t.last_name}`
                     : t.username,
               })),
-              defaultValue: currentTicket
-                ? typeof currentTicket.assigned_technician === "object"
-                  ? currentTicket.assigned_technician.id
-                  : currentTicket.assigned_technician
-                : null,
+              defaultValue: currentTicket ? currentTicket.assigned_technician : null, // preselect
             },
           ]}
         />
