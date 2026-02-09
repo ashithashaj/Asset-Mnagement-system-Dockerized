@@ -18,6 +18,7 @@ export default function Tickets() {
   const [assetsList, setAssetsList] = useState([]);
   const [techniciansList, setTechniciansList] = useState([]);
 
+  // Fetch tickets, assets, technicians
   useEffect(() => {
     dispatch(fetchTickets());
     fetchAssets();
@@ -40,7 +41,7 @@ export default function Tickets() {
       const res = await axios.get(USERS_API, {
         headers: { Authorization: `Bearer ${localStorage.getItem("access")}` },
       });
-      setTechniciansList(res.data); // <-- this is your dropdown list
+      setTechniciansList(res.data);
     } catch (err) {
       console.error("Failed to fetch technicians:", err);
     }
@@ -71,21 +72,28 @@ export default function Tickets() {
     setShowModal(false);
   };
 
-  const tableData = Array.isArray(tickets)
-    ? tickets.map((t) => ({
-        ...t,
-        technician_name:
-          typeof t.assigned_technician === "object"
-            ? t.assigned_technician?.username
-            : (techniciansList.find((tech) => tech.id === t.assigned_technician)?.username || "-"),
-        actions: (
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={() => handleEdit(t)}>Edit</button>
-            <button onClick={() => handleDelete(t.id)}>Delete</button>
-          </div>
-        ),
-      }))
-    : [];
+  // Map tickets for table
+  const tableData = Array.isArray(tickets) ? tickets.map((t) => {
+    let technicianName = "-";
+    if (t.assigned_technician) {
+      if (typeof t.assigned_technician === "object") {
+        technicianName = t.assigned_technician.username || "-";
+      } else {
+        const tech = techniciansList.find((tech) => tech.id === t.assigned_technician);
+        technicianName = tech ? tech.username : "-";
+      }
+    }
+    return {
+      ...t,
+      technician_name: technicianName,
+      actions: (
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={() => handleEdit(t)}>Edit</button>
+          <button onClick={() => handleDelete(t.id)}>Delete</button>
+        </div>
+      ),
+    };
+  }) : [];
 
   return (
     <div style={{ padding: "20px" }}>
@@ -94,9 +102,9 @@ export default function Tickets() {
 
       {loading && <p>Loading tickets...</p>}
       {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
-      {!loading && tableData.length === 0 && <p>No tickets found.</p>}
+      {!loading && !error && tableData.length === 0 && <p>No tickets found.</p>}
 
-      {tableData.length > 0 && (
+      {!loading && tableData.length > 0 && (
         <Table
           columns={[
             { key: "asset_name", label: "Asset" },
@@ -122,8 +130,9 @@ export default function Tickets() {
               label: "Asset",
               type: "select",
               options: assetsList.map((a) => ({ value: a.id, label: a.name })),
+              value: currentTicket?.asset || "",
             },
-            { name: "issue", label: "Issue", type: "text" },
+            { name: "issue", label: "Issue", type: "text", value: currentTicket?.issue || "" },
             {
               name: "status",
               label: "Status",
@@ -134,12 +143,14 @@ export default function Tickets() {
                 { value: "Completed", label: "Completed" },
                 { value: "Cancelled", label: "Cancelled" },
               ],
+              value: currentTicket?.status || "Pending",
             },
             {
               name: "assigned_technician",
               label: "Technician",
               type: "select",
               options: techniciansList.map((t) => ({ value: t.id, label: t.username })),
+              value: currentTicket?.assigned_technician?.id || currentTicket?.assigned_technician || "",
             },
           ]}
         />
