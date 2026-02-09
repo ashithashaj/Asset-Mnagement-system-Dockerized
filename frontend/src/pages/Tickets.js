@@ -162,6 +162,7 @@ export default function Tickets() {
               label: "Asset",
               type: "select",
               options: assetsList.map((a) => ({ value: a.id, label: a.name })),
+              defaultValue: currentTicket ? currentTicket.asset : null,
             },
             { name: "issue", label: "Issue", type: "text" },
             {
@@ -174,6 +175,7 @@ export default function Tickets() {
                 { value: "Completed", label: "Completed" },
                 { value: "Cancelled", label: "Cancelled" },
               ],
+              defaultValue: currentTicket ? currentTicket.status : "Pending",
             },
             {
               name: "assigned_technician",
@@ -186,6 +188,7 @@ export default function Tickets() {
                     ? `${t.first_name} ${t.last_name}`
                     : t.username,
               })),
+              defaultValue: currentTicket ? currentTicket.assigned_technician : null, // ✅ Pre-select technician
             },
           ]}
         />
