@@ -42,7 +42,19 @@ export default function Assets() {
     setShowModal(false);
   };
 
-  // Table columns
+  // Map assets safely
+  const tableData = Array.isArray(assets)
+    ? assets.map((a) => ({
+        ...a,
+        actions: (
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button onClick={() => handleEdit(a)}>Edit</button>
+            <button onClick={() => handleDelete(a.id)}>Delete</button>
+          </div>
+        ),
+      }))
+    : [];
+
   const columns = [
     { key: "name", label: "Name" },
     { key: "type", label: "Type" },
@@ -58,27 +70,10 @@ export default function Assets() {
       <button onClick={handleAdd}>Add Asset</button>
 
       {loading && <p>Loading assets...</p>}
-
       {error && <p style={{ color: "red" }}>Error: {JSON.stringify(error)}</p>}
+      {!loading && !error && tableData.length === 0 && <p>No assets found.</p>}
 
-      {!loading && !error && Array.isArray(assets) && assets.length === 0 && (
-        <p>No assets found.</p>
-      )}
-
-      {!loading && Array.isArray(assets) && assets.length > 0 && (
-        <Table
-          columns={columns}
-          data={assets.map((a) => ({
-            ...a,
-            actions: (
-              <>
-                <button onClick={() => handleEdit(a)}>Edit</button>
-                <button onClick={() => handleDelete(a.id)}>Delete</button>
-              </>
-            ),
-          }))}
-        />
-      )}
+      {tableData.length > 0 && <Table columns={columns} data={tableData} />}
 
       {showModal && (
         <Form
