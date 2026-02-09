@@ -6,7 +6,7 @@ import Table from "../components/Table";
 import Form from "../components/Form";
 import axios from "axios";
 
-// Render backend URLs
+// Backend URLs
 const ASSETS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/assets/";
 const USERS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/users/";
 
@@ -18,7 +18,6 @@ export default function Tickets() {
   const [currentTicket, setCurrentTicket] = useState(null);
   const [assetsList, setAssetsList] = useState([]);
   const [techniciansList, setTechniciansList] = useState([]);
-  const [selectedTechnician, setSelectedTechnician] = useState(null);
 
   // Fetch tickets, assets, and technicians
   useEffect(() => {
@@ -74,15 +73,11 @@ export default function Tickets() {
     setShowModal(false);
   };
 
-  const handleSelectTechnician = (ticket) => {
-    setSelectedTechnician(ticket.technician_name || "-");
-  };
-
-  // Map tickets safely
+  // Map tickets for table
   const tableData = Array.isArray(tickets)
     ? tickets.map((t) => ({
         ...t,
-        technician_name: t.technician_name || "-", // use serializer field
+        technician_name: t.technician_name || "-", // from serializer
         actions: (
           <div style={{ display: "flex", gap: "10px" }}>
             <button
@@ -112,20 +107,6 @@ export default function Tickets() {
               onClick={() => handleDelete(t.id)}
             >
               Delete
-            </button>
-            <button
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#f0f4c3",
-                color: "#827717",
-                border: "1px solid #e6ee9c",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => handleSelectTechnician(t)}
-            >
-              Select Technician
             </button>
           </div>
         ),
@@ -169,20 +150,6 @@ export default function Tickets() {
         />
       )}
 
-      {selectedTechnician && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "10px",
-            border: "1px solid #ccc",
-            backgroundColor: "#f1f8e9",
-          }}
-        >
-          <h3>Selected Technician</h3>
-          <p>{selectedTechnician}</p>
-        </div>
-      )}
-
       {showModal && (
         <Form
           title={currentTicket ? "Edit Ticket" : "Create Ticket"}
@@ -212,7 +179,13 @@ export default function Tickets() {
               name: "assigned_technician",
               label: "Technician",
               type: "select",
-              options: techniciansList.map((t) => ({ value: t.id, label: t.username })),
+              options: techniciansList.map((t) => ({
+                value: t.id,
+                label:
+                  t.first_name && t.last_name
+                    ? `${t.first_name} ${t.last_name}`
+                    : t.username,
+              })),
             },
           ]}
         />

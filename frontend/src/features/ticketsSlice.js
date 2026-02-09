@@ -77,20 +77,53 @@ const ticketsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTickets.pending, (state) => { state.loading = true; state.error = null; })
-      .addCase(fetchTickets.fulfilled, (state, action) => { state.tickets = action.payload; state.loading = false; })
-      .addCase(fetchTickets.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
-      .addCase(addTicket.fulfilled, (state, action) => { state.tickets.push(action.payload); })
-      .addCase(addTicket.rejected, (state, action) => { state.error = action.payload; })
+      // Fetch tickets
+      .addCase(fetchTickets.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchTickets.fulfilled, (state, action) => {
+        state.tickets = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchTickets.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Add ticket
+      .addCase(addTicket.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(addTicket.fulfilled, (state, action) => {
+        state.tickets.push(action.payload);
+      })
+      .addCase(addTicket.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
+      // Update ticket
+      .addCase(updateTicket.pending, (state) => {
+        state.error = null;
+      })
       .addCase(updateTicket.fulfilled, (state, action) => {
         const index = state.tickets.findIndex((t) => t.id === action.payload.id);
         if (index !== -1) state.tickets[index] = action.payload;
       })
-      .addCase(updateTicket.rejected, (state, action) => { state.error = action.payload; })
+      .addCase(updateTicket.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
+      // Delete ticket
+      .addCase(deleteTicket.pending, (state) => {
+        state.error = null;
+      })
       .addCase(deleteTicket.fulfilled, (state, action) => {
         state.tickets = state.tickets.filter((t) => t.id !== action.payload);
       })
-      .addCase(deleteTicket.rejected, (state, action) => { state.error = action.payload; });
+      .addCase(deleteTicket.rejected, (state, action) => {
+        state.error = action.payload;
+      });
   },
 });
 
