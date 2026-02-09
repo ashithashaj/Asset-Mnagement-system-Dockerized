@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "http://localhost:8000/api/assets/"; // adjust if different
+const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/assets/";
+ // adjust if different
 
 // ------------------ THUNKS ------------------ //
 
