@@ -1,13 +1,13 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.http import JsonResponse
+from django.shortcuts import redirect
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-# Root endpoint
+# Redirect root to admin
 def home(request):
-    return JsonResponse({"message": "API is live!"})
+    return redirect('admin/')
 
 # Swagger / API documentation
 schema_view = get_schema_view(
@@ -21,7 +21,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    # Root
+    # Root -> admin
     path('', home, name='home'),
 
     # Admin

@@ -3,16 +3,19 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env
 load_dotenv()
 
+# =========================
+# Base Directory
+# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# =========================
 # SECURITY
+# =========================
 SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-dev-key-change-this")
-
 DEBUG = os.getenv("DEBUG", "True") == "True"
-
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 # =========================
@@ -32,6 +35,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "corsheaders",
+    "drf_yasg",
 
     # Local apps
     "users",
@@ -42,11 +46,11 @@ INSTALLED_APPS = [
 ]
 
 # =========================
-# Middleware (ORDER MATTERS)
+# Middleware
 # =========================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # ✅ REQUIRED
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Serve static files
     "corsheaders.middleware.CorsMiddleware",
 
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -57,6 +61,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# =========================
+# URL Configuration
+# =========================
 ROOT_URLCONF = "backend.urls"
 
 # =========================
@@ -65,12 +72,12 @@ ROOT_URLCONF = "backend.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
+        "DIRS": [BASE_DIR / "templates"],  # your custom templates
+        "APP_DIRS": True,  # includes drf-yasg templates
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
-                "django.template.context_processors.request",
+                "django.template.context_processors.request",  # required by drf-yasg
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -81,7 +88,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 # =========================
-# Database (SQLite – Docker safe)
+# Database (SQLite – safe for Docker)
 # =========================
 DATABASES = {
     "default": {
@@ -101,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # =========================
-# Custom user model
+# Custom User Model
 # =========================
 AUTH_USER_MODEL = "users.User"
 
@@ -114,14 +121,12 @@ USE_I18N = True
 USE_TZ = True
 
 # =========================
-# Static files (ADMIN FIX)
+# Static files
 # =========================
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = BASE_DIR / "static"  # where collectstatic will collect
 
-STATICFILES_STORAGE = (
-    "whitenoise.storage.CompressedManifestStaticFilesStorage"
-)
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # =========================
 # Default primary key
@@ -141,7 +146,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticated",  # APIs require auth by default
     ),
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -149,7 +154,7 @@ REST_FRAMEWORK = {
 }
 
 # =========================
-# JWT
+# JWT Settings
 # =========================
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
