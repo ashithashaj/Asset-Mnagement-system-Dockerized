@@ -2,7 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/inventory/";
+const API_URL = "https://asset-management-system-backend-tr78.onrender.com/api/inventory/";
 
 // ------------------ THUNKS ------------------
 

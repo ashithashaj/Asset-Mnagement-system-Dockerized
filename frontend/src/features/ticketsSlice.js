@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Make sure this matches your deployed backend path exactly
-const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/tickets/";
+const API_URL = "https://asset-management-system-backend-tr78.onrender.com/api/tickets/";
 
 // ------------------ THUNKS ------------------
 

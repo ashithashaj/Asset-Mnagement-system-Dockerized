@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Base URL for your deployed backend
-const API_URL = "https://asset-mnagement-system-dockerized.onrender.com/api/users";
+const API_URL = "https://asset-management-system-backend-tr78.onrender.com/api/users";
 
 /* ================= LOGIN ================= */
 export const loginUser = createAsyncThunk(

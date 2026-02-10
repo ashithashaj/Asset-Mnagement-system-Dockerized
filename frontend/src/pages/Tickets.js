@@ -6,8 +6,8 @@ import Form from "../components/Form";
 import axios from "axios";
 
 // ✅ Updated USERS_API URL to point to the correct endpoint
-const ASSETS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/assets/";
-const USERS_API = "https://asset-mnagement-system-dockerized.onrender.com/api/users/users/";
+const ASSETS_API = "https://asset-management-system-backend-tr78.onrender.com/api/assets/";
+const USERS_API = "https://asset-management-system-backend-tr78.onrender.com/api/users/users/";
 
 export default function Tickets() {
   const dispatch = useDispatch();
